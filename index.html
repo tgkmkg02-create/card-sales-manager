@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>カード販売管理</title>
+<title>カード販売管理 / 카드 판매 관리</title>
 <style>
   :root {
     --bg: #ffffff;
@@ -31,12 +31,15 @@
   body {
     background: #f6f7f9;
     color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, "Malgun Gothic", sans-serif;
     font-size: 15px;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
   }
   .wrap { max-width: 1200px; margin: 0 auto; padding: 24px 20px 80px; }
+
+  /* Korean secondary text */
+  .ko { color: var(--text-faint); font-weight: 600; }
 
   /* Header */
   header.app {
@@ -45,52 +48,51 @@
   }
   .brand { display: flex; align-items: center; gap: 12px; }
   .brand .logo {
-    width: 42px; height: 42px; border-radius: 11px;
+    width: 44px; height: 44px; border-radius: 11px;
     background: linear-gradient(135deg, #2563eb, #7c3aed);
-    display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 20px;
+    display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 20px; flex-shrink: 0;
   }
   .brand h1 { font-size: 20px; margin: 0; font-weight: 800; letter-spacing: -.02em; }
+  .brand h1 .ko { font-size: 13px; font-weight: 700; margin-left: 7px; }
   .brand p { margin: 1px 0 0; font-size: 12.5px; color: var(--text-sub); }
+  .brand p .ko { display: block; font-size: 11.5px; margin-top: 1px; }
   .header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 
   button {
     font-family: inherit; font-size: 14px; cursor: pointer;
     border-radius: 10px; border: 1px solid var(--line-strong);
-    background: #fff; color: var(--text); padding: 9px 14px; font-weight: 600;
-    transition: .12s ease; white-space: nowrap;
+    background: #fff; color: var(--text); padding: 7px 13px; font-weight: 700;
+    transition: .12s ease; white-space: nowrap; line-height: 1.2; text-align: center;
   }
   button:hover { background: #f7f8fa; }
   button:active { transform: translateY(1px); }
+  button .ko { display: block; font-size: 10.5px; font-weight: 600; opacity: .7; margin-top: 1px; }
   button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
   button.primary:hover { background: #1d4ed8; }
-  button.ghost { background: transparent; border-color: transparent; color: var(--text-sub); padding: 8px 10px; }
+  button.primary .ko { color: #fff; opacity: .85; }
+  button.ghost { background: transparent; border-color: transparent; color: var(--text-sub); }
   button.ghost:hover { background: #eceef1; color: var(--text); }
+  button.ghost .ko { opacity: .8; }
   button.danger { color: var(--red); border-color: #f1c7c7; }
   button.danger:hover { background: #fdecec; }
-  .btn-icon { font-size: 15px; }
+  button.sm { padding: 6px 10px; font-size: 13px; }
 
   /* Summary cards */
-  .summary {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px;
-  }
+  .summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
   .stat {
     background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
     padding: 16px 18px; box-shadow: var(--shadow);
   }
-  .stat .label { font-size: 12.5px; color: var(--text-sub); font-weight: 600; display: flex; align-items: center; gap: 6px; }
+  .stat .label { font-size: 12.5px; color: var(--text-sub); font-weight: 700; display: flex; align-items: center; gap: 6px; }
+  .stat .label .ko { font-weight: 600; }
   .stat .value { font-size: 26px; font-weight: 800; letter-spacing: -.02em; margin-top: 6px; }
   .stat .value small { font-size: 14px; font-weight: 700; color: var(--text-sub); margin-left: 2px; }
   .stat .sub { font-size: 12px; color: var(--text-faint); margin-top: 2px; }
-  .stat .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .stat .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
   /* Toolbar */
-  .toolbar {
-    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
-    margin-bottom: 16px;
-  }
-  .search {
-    flex: 1; min-width: 200px; position: relative;
-  }
+  .toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+  .search { flex: 1; min-width: 220px; position: relative; }
   .search input {
     width: 100%; padding: 10px 12px 10px 36px; border-radius: 10px;
     border: 1px solid var(--line-strong); font-size: 14px; font-family: inherit; background: #fff;
@@ -99,98 +101,81 @@
   .search .ico { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-faint); }
   select.filter {
     padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line-strong);
-    font-size: 14px; font-family: inherit; background: #fff; color: var(--text); font-weight: 600;
+    font-size: 13.5px; font-family: inherit; background: #fff; color: var(--text); font-weight: 600;
   }
   select.filter:focus { outline: none; border-color: var(--accent); }
 
   /* Grid */
-  .grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;
-  }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; }
   .card {
     background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
-    overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column;
-    transition: .15s ease;
+    overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; transition: .15s ease;
   }
   .card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
-  .card .photo {
-    aspect-ratio: 4/3; background: #f1f2f4; position: relative; overflow: hidden;
-    display: grid; place-items: center;
-  }
+  .card .photo { aspect-ratio: 4/3; background: #f1f2f4; position: relative; overflow: hidden; display: grid; place-items: center; }
   .card .photo img { width: 100%; height: 100%; object-fit: contain; }
-  .card .photo .noimg { color: var(--text-faint); font-size: 13px; text-align: center; }
+  .card .photo .noimg { color: var(--text-faint); font-size: 13px; text-align: center; line-height: 1.5; }
   .card .photo .cat {
-    position: absolute; top: 10px; left: 10px; font-size: 11.5px; font-weight: 700;
-    padding: 4px 9px; border-radius: 999px; background: rgba(255,255,255,.92); color: var(--text);
-    backdrop-filter: blur(4px); box-shadow: var(--shadow);
+    position: absolute; top: 10px; left: 10px; font-size: 11px; font-weight: 700;
+    padding: 4px 9px; border-radius: 999px; background: rgba(255,255,255,.94); color: var(--text);
+    backdrop-filter: blur(4px); box-shadow: var(--shadow); line-height: 1.3; text-align: center;
   }
+  .card .photo .cat .ko { display: block; font-size: 9.5px; }
   .card .body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
   .card .title { font-size: 16.5px; font-weight: 800; letter-spacing: -.01em; }
   .card .vendor { font-size: 12.5px; color: var(--text-sub); margin-top: -4px; }
-  .card .nums { display: flex; gap: 16px; }
-  .card .num .k { font-size: 11.5px; color: var(--text-faint); font-weight: 600; }
+  .card .nums { display: flex; gap: 18px; }
+  .card .num .k { font-size: 11px; color: var(--text-faint); font-weight: 600; }
+  .card .num .k .ko { font-weight: 500; }
   .card .num .v { font-size: 15px; font-weight: 700; }
   .card .total { font-size: 20px; font-weight: 800; letter-spacing: -.02em; }
-  .card .total small { font-size: 13px; color: var(--text-sub); font-weight: 700; }
+  .card .total small { font-size: 12px; color: var(--text-sub); font-weight: 700; }
   .badges { display: flex; gap: 8px; flex-wrap: wrap; }
   .badge {
     font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px;
-    display: inline-flex; align-items: center; gap: 5px;
+    display: inline-flex; align-items: center; gap: 5px; line-height: 1.2;
   }
-  .badge .d { width: 7px; height: 7px; border-radius: 50%; }
+  .badge .ko { font-size: 9.5px; font-weight: 600; opacity: .8; color: inherit; }
+  .badge .txt { display: inline-flex; flex-direction: column; }
+  .badge .d { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
   .badge.paid { background: var(--green-soft); color: var(--green); }
   .badge.unpaid { background: var(--amber-soft); color: var(--amber); }
   .badge.shipped { background: var(--accent-soft); color: var(--accent); }
   .badge.unshipped { background: var(--gray-soft); color: var(--gray); }
   .card .note { font-size: 12.5px; color: var(--text-sub); border-top: 1px solid var(--line); padding-top: 9px; white-space: pre-wrap; word-break: break-word; }
-  .card .foot {
-    display: flex; gap: 8px; justify-content: space-between; align-items: center;
-    border-top: 1px solid var(--line); padding-top: 10px; margin-top: auto;
-  }
+  .card .foot { display: flex; gap: 8px; justify-content: space-between; align-items: center; border-top: 1px solid var(--line); padding-top: 10px; margin-top: auto; }
   .card .foot .date { font-size: 11.5px; color: var(--text-faint); }
   .card .foot .acts { display: flex; gap: 4px; }
 
-  .empty {
-    text-align: center; padding: 70px 20px; color: var(--text-sub);
-    background: #fff; border: 1px dashed var(--line-strong); border-radius: var(--radius);
-  }
+  .empty { text-align: center; padding: 70px 20px; color: var(--text-sub); background: #fff; border: 1px dashed var(--line-strong); border-radius: var(--radius); }
   .empty .big { font-size: 40px; margin-bottom: 10px; }
+  .empty .ko { display: block; margin-top: 4px; }
 
   /* Modal */
-  .overlay {
-    position: fixed; inset: 0; background: rgba(16,24,40,.45); backdrop-filter: blur(2px);
-    display: none; align-items: flex-start; justify-content: center; z-index: 50; padding: 30px 16px; overflow-y: auto;
-  }
+  .overlay { position: fixed; inset: 0; background: rgba(16,24,40,.45); backdrop-filter: blur(2px); display: none; align-items: flex-start; justify-content: center; z-index: 50; padding: 30px 16px; overflow-y: auto; }
   .overlay.open { display: flex; }
-  .modal {
-    background: #fff; border-radius: 18px; width: 100%; max-width: 520px;
-    box-shadow: var(--shadow-lg); animation: pop .18s ease;
-  }
+  .modal { background: #fff; border-radius: 18px; width: 100%; max-width: 520px; box-shadow: var(--shadow-lg); animation: pop .18s ease; }
   @keyframes pop { from { transform: translateY(8px) scale(.98); opacity: 0 } to { transform: none; opacity: 1 } }
   .modal h2 { font-size: 18px; margin: 0; padding: 20px 22px 0; font-weight: 800; }
+  .modal h2 .ko { font-size: 13px; font-weight: 700; margin-left: 8px; }
   .modal .form { padding: 18px 22px 22px; display: flex; flex-direction: column; gap: 14px; }
   .field label { display: block; font-size: 12.5px; font-weight: 700; color: var(--text-sub); margin-bottom: 6px; }
+  .field label .ko { font-weight: 600; }
   .field input, .field select, .field textarea {
     width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line-strong);
     font-size: 14.5px; font-family: inherit; background: #fff; color: var(--text);
   }
-  .field input:focus, .field select:focus, .field textarea:focus {
-    outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft);
-  }
+  .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
   .field textarea { resize: vertical; min-height: 60px; }
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .calc { font-size: 13px; color: var(--text-sub); }
   .calc b { font-size: 17px; color: var(--text); font-weight: 800; }
   .photo-input { display: flex; align-items: center; gap: 12px; }
-  .photo-prev {
-    width: 72px; height: 72px; border-radius: 10px; background: #f1f2f4; overflow: hidden;
-    display: grid; place-items: center; color: var(--text-faint); font-size: 11px; border: 1px solid var(--line); flex-shrink: 0;
-  }
+  .photo-prev { width: 72px; height: 72px; border-radius: 10px; background: #f1f2f4; overflow: hidden; display: grid; place-items: center; color: var(--text-faint); font-size: 11px; border: 1px solid var(--line); flex-shrink: 0; text-align: center; }
   .photo-prev img { width: 100%; height: 100%; object-fit: cover; }
   .modal .actions { display: flex; justify-content: flex-end; gap: 10px; padding-top: 4px; }
-  .modal .close-x { float: right; }
 
-  footer.note-foot { text-align: center; color: var(--text-faint); font-size: 12px; margin-top: 40px; }
+  footer.note-foot { text-align: center; color: var(--text-faint); font-size: 12px; margin-top: 40px; line-height: 1.7; }
 
   @media (max-width: 760px) {
     .summary { grid-template-columns: repeat(2, 1fr); }
@@ -204,16 +189,16 @@
     <div class="brand">
       <div class="logo">C</div>
       <div>
-        <h1>カード販売管理</h1>
-        <p>ポケモン / ワンピース 業者販売の入金・出荷管理</p>
+        <h1>カード販売管理<span class="ko">카드 판매 관리</span></h1>
+        <p>ポケモン / ワンピース 業者販売の入金・出荷管理<span class="ko">포켓몬 · 원피스 업자 판매 입금 · 출고 관리</span></p>
       </div>
     </div>
     <div class="header-actions">
-      <button class="ghost" onclick="exportShare()" title="データ込みのHTMLを書き出して共有">📤 共有用に書き出し</button>
-      <button class="ghost" onclick="exportJSON()" title="バックアップ用にデータ保存">💾 バックアップ</button>
-      <button class="ghost" onclick="document.getElementById('importFile').click()" title="バックアップから復元">📥 復元</button>
+      <button class="ghost" onclick="exportShare()" title="データ込みのHTMLを書き出して共有">📤 共有用に書き出し<span class="ko">공유용 내보내기</span></button>
+      <button class="ghost" onclick="exportJSON()" title="バックアップ用にデータ保存">💾 バックアップ<span class="ko">백업</span></button>
+      <button class="ghost" onclick="document.getElementById('importFile').click()" title="バックアップから復元">📥 復元<span class="ko">복원</span></button>
       <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importJSON(event)" />
-      <button class="primary" onclick="openForm()">＋ 商品を追加</button>
+      <button class="primary" onclick="openForm()">＋ 商品を追加<span class="ko">상품 추가</span></button>
     </div>
   </header>
 
@@ -222,23 +207,23 @@
   <div class="toolbar">
     <div class="search">
       <span class="ico">🔍</span>
-      <input id="searchInput" placeholder="商品名・業者名で検索" oninput="render()" />
+      <input id="searchInput" placeholder="商品名・業者名で検索 / 상품명·업자명 검색" oninput="render()" />
     </div>
     <select class="filter" id="filterCat" onchange="render()">
-      <option value="">全カテゴリー</option>
-      <option value="ポケモンカード">ポケモンカード</option>
-      <option value="ワンピースカード">ワンピースカード</option>
-      <option value="その他">その他</option>
+      <option value="">全カテゴリー / 전체</option>
+      <option value="ポケモンカード">ポケモンカード / 포켓몬</option>
+      <option value="ワンピースカード">ワンピースカード / 원피스</option>
+      <option value="その他">その他 / 기타</option>
     </select>
     <select class="filter" id="filterPay" onchange="render()">
-      <option value="">入金：すべて</option>
-      <option value="入金済み">入金済み</option>
-      <option value="入金待ち">入金待ち</option>
+      <option value="">入金：すべて / 입금 전체</option>
+      <option value="入金済み">入金済み / 입금완료</option>
+      <option value="入金待ち">入金待ち / 입금대기</option>
     </select>
     <select class="filter" id="filterShip" onchange="render()">
-      <option value="">出荷：すべて</option>
-      <option value="出荷済み">出荷済み</option>
-      <option value="未出荷">未出荷</option>
+      <option value="">出荷：すべて / 출고 전체</option>
+      <option value="出荷済み">出荷済み / 출고완료</option>
+      <option value="未出荷">未出荷 / 미출고</option>
     </select>
   </div>
 
@@ -246,22 +231,23 @@
 
   <footer class="note-foot">
     データはこのブラウザに自動保存されます。共有・引き継ぎは「共有用に書き出し」または「バックアップ」をお使いください。
+    <span class="ko" style="display:block">데이터는 이 브라우저에 자동 저장됩니다. 공유 · 인계는 「공유용 내보내기」 또는 「백업」을 이용하세요.</span>
   </footer>
 </div>
 
 <!-- Modal -->
 <div class="overlay" id="overlay" onclick="if(event.target===this)closeForm()">
   <div class="modal">
-    <h2 id="modalTitle">商品を追加</h2>
+    <h2 id="modalTitle">商品を追加<span class="ko">상품 추가</span></h2>
     <div class="form">
       <input type="hidden" id="f_id" />
       <div class="field">
-        <label>商品名 <span style="color:var(--red)">*</span></label>
-        <input id="f_name" placeholder="例：アビスアイ" />
+        <label>商品名 <span class="ko">상품명</span> <span style="color:var(--red)">*</span></label>
+        <input id="f_name" placeholder="例 / 예: アビスアイ" />
       </div>
       <div class="row2">
         <div class="field">
-          <label>カテゴリー</label>
+          <label>カテゴリー <span class="ko">카테고리</span></label>
           <select id="f_cat">
             <option>ポケモンカード</option>
             <option>ワンピースカード</option>
@@ -269,31 +255,31 @@
           </select>
         </div>
         <div class="field">
-          <label>販売先（業者）</label>
-          <input id="f_vendor" placeholder="例：〇〇商会" />
+          <label>販売先（業者） <span class="ko">판매처(업자)</span></label>
+          <input id="f_vendor" placeholder="例 / 예: ○○商会" />
         </div>
       </div>
       <div class="row2">
         <div class="field">
-          <label>発注個数</label>
-          <input id="f_qty" type="number" min="0" placeholder="例：450" oninput="updateCalc()" />
+          <label>発注個数 <span class="ko">발주 수량</span></label>
+          <input id="f_qty" type="number" min="0" placeholder="例 / 예: 450" oninput="updateCalc()" />
         </div>
         <div class="field">
-          <label>単価（円）</label>
-          <input id="f_price" type="number" min="0" placeholder="例：13500" oninput="updateCalc()" />
+          <label>単価（円） <span class="ko">단가(엔)</span></label>
+          <input id="f_price" type="number" min="0" placeholder="例 / 예: 13700" oninput="updateCalc()" />
         </div>
       </div>
-      <div class="calc">合計金額：<b id="calcTotal">¥0</b></div>
+      <div class="calc">合計金額 / 합계 금액：<b id="calcTotal">¥0</b></div>
       <div class="row2">
         <div class="field">
-          <label>入金状況</label>
+          <label>入金状況 <span class="ko">입금 상태</span></label>
           <select id="f_pay">
             <option>入金待ち</option>
             <option>入金済み</option>
           </select>
         </div>
         <div class="field">
-          <label>出荷状況</label>
+          <label>出荷状況 <span class="ko">출고 상태</span></label>
           <select id="f_ship">
             <option>未出荷</option>
             <option>出荷済み</option>
@@ -301,29 +287,29 @@
         </div>
       </div>
       <div class="field">
-        <label>写真</label>
+        <label>写真 <span class="ko">사진</span></label>
         <div class="photo-input">
-          <div class="photo-prev" id="photoPrev">なし</div>
+          <div class="photo-prev" id="photoPrev">なし<br><span class="ko">없음</span></div>
           <div>
-            <button type="button" onclick="document.getElementById('f_photo').click()">画像を選ぶ</button>
-            <button type="button" class="ghost" id="photoClear" onclick="clearPhoto()" style="display:none">削除</button>
+            <button type="button" class="sm" onclick="document.getElementById('f_photo').click()">画像を選ぶ<span class="ko">이미지 선택</span></button>
+            <button type="button" class="ghost sm" id="photoClear" onclick="clearPhoto()" style="display:none">削除<span class="ko">삭제</span></button>
           </div>
           <input type="file" id="f_photo" accept="image/*" style="display:none" onchange="onPhoto(event)" />
         </div>
       </div>
       <div class="field">
-        <label>メモ</label>
-        <textarea id="f_note" placeholder="納期・条件・連絡事項など"></textarea>
+        <label>メモ <span class="ko">메모</span></label>
+        <textarea id="f_note" placeholder="納期・条件・連絡事項など / 납기 · 조건 · 연락사항 등"></textarea>
       </div>
       <div class="actions">
-        <button class="ghost" onclick="closeForm()">キャンセル</button>
-        <button class="primary" onclick="saveItem()">保存</button>
+        <button class="ghost" onclick="closeForm()">キャンセル<span class="ko">취소</span></button>
+        <button class="primary" onclick="saveItem()">保存<span class="ko">저장</span></button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ===== データ（共有書き出しでここに埋め込まれます） ===== -->
+<!-- ===== データ（共有書き出しでここに埋め込まれます / 공유 내보내기 시 여기에 저장됩니다） ===== -->
 <script id="embedded-data" type="application/json">
 [
   {
@@ -338,6 +324,19 @@
     "note": "",
     "photo": "",
     "createdAt": "2026-06-13"
+  },
+  {
+    "id": "seed-151",
+    "name": "151",
+    "cat": "ポケモンカード",
+    "vendor": "",
+    "qty": 20,
+    "price": 66000,
+    "pay": "入金待ち",
+    "ship": "出荷済み",
+    "note": "",
+    "photo": "",
+    "createdAt": "2026-06-13"
   }
 ]
 </script>
@@ -345,6 +344,13 @@
 <script>
   const STORE_KEY = "card-sales-manager-v1";
   const yen = n => "¥" + (Number(n) || 0).toLocaleString("ja-JP");
+
+  // 日本語 → 韓国語 表示マップ
+  const KO = {
+    "入金済み":"입금완료", "入金待ち":"입금대기", "出荷済み":"출고완료", "未出荷":"미출고",
+    "ポケモンカード":"포켓몬 카드", "ワンピースカード":"원피스 카드", "その他":"기타"
+  };
+  const ko = jp => KO[jp] || "";
 
   function loadData() {
     const saved = localStorage.getItem(STORE_KEY);
@@ -354,17 +360,13 @@
   }
   let items = loadData();
 
-  function save() {
-    localStorage.setItem(STORE_KEY, JSON.stringify(items));
-    render();
-  }
-
+  function save() { localStorage.setItem(STORE_KEY, JSON.stringify(items)); render(); }
   function uid() { return "i" + Date.now() + Math.floor(Math.random()*1000); }
   function today() {
-    const d = new Date();
-    const p = n => String(n).padStart(2,"0");
+    const d = new Date(); const p = n => String(n).padStart(2,"0");
     return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
   }
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
   /* ---------- Summary ---------- */
   function renderSummary() {
@@ -373,14 +375,14 @@
     const unpaid = items.filter(i=>i.pay==="入金待ち").reduce((s,i)=> s + i.qty*i.price, 0);
     const unshipped = items.filter(i=>i.ship==="未出荷").length;
     const cards = [
-      { label:"総売上", color:"#2563eb", value: yen(total), sub: items.length + " 商品" },
-      { label:"入金済み", color:"#16a34a", value: yen(paid), sub: items.filter(i=>i.pay==="入金済み").length + " 件" },
-      { label:"入金待ち", color:"#d97706", value: yen(unpaid), sub: items.filter(i=>i.pay==="入金待ち").length + " 件" },
-      { label:"未出荷", color:"#6b7280", value: unshipped + "<small> 件</small>", sub: "要対応" },
+      { jp:"総売上", ko:"총매출", color:"#2563eb", value: yen(total), sub:`${items.length} 商品 / 상품` },
+      { jp:"入金済み", ko:"입금완료", color:"#16a34a", value: yen(paid), sub:`${items.filter(i=>i.pay==="入金済み").length} 件 / 건` },
+      { jp:"入金待ち", ko:"입금대기", color:"#d97706", value: yen(unpaid), sub:`${items.filter(i=>i.pay==="入金待ち").length} 件 / 건` },
+      { jp:"未出荷", ko:"미출고", color:"#6b7280", value: `${unshipped}<small> 件 / 건</small>`, sub:"要対応 / 대응 필요" },
     ];
     document.getElementById("summary").innerHTML = cards.map(c=>`
       <div class="stat">
-        <div class="label"><span class="dot" style="background:${c.color}"></span>${c.label}</div>
+        <div class="label"><span class="dot" style="background:${c.color}"></span>${c.jp} <span class="ko">${c.ko}</span></div>
         <div class="value">${c.value}</div>
         <div class="sub">${c.sub}</div>
       </div>`).join("");
@@ -398,10 +400,7 @@
       if (fc && i.cat !== fc) return false;
       if (fp && i.pay !== fp) return false;
       if (fs && i.ship !== fs) return false;
-      if (q) {
-        const hay = (i.name + " " + (i.vendor||"")).toLowerCase();
-        if (!hay.includes(q)) return false;
-      }
+      if (q) { if (!((i.name + " " + (i.vendor||"")).toLowerCase().includes(q))) return false; }
       return true;
     });
 
@@ -409,7 +408,9 @@
     if (list.length === 0) {
       grid.innerHTML = `<div class="empty" style="grid-column:1/-1">
         <div class="big">📦</div>
-        <div>${items.length===0 ? "まだ商品がありません。「＋ 商品を追加」から登録してください。" : "条件に一致する商品がありません。"}</div>
+        <div>${items.length===0
+          ? "まだ商品がありません。「＋ 商品を追加」から登録してください。<span class='ko'>아직 상품이 없습니다. 「+ 상품 추가」에서 등록하세요.</span>"
+          : "条件に一致する商品がありません。<span class='ko'>조건에 맞는 상품이 없습니다.</span>"}</div>
       </div>`;
       return;
     }
@@ -420,12 +421,12 @@
       const shipCls = i.ship === "出荷済み" ? "shipped" : "unshipped";
       const photo = i.photo
         ? `<img src="${i.photo}" alt="${esc(i.name)}" />`
-        : `<div class="noimg">🃏<br>画像なし</div>`;
+        : `<div class="noimg">🃏<br>画像なし<br><span class="ko">이미지 없음</span></div>`;
       return `
       <div class="card">
         <div class="photo">
           ${photo}
-          <span class="cat">${esc(i.cat)}</span>
+          <span class="cat">${esc(i.cat)}<span class="ko">${ko(i.cat)}</span></span>
         </div>
         <div class="body">
           <div>
@@ -433,28 +434,26 @@
             ${i.vendor ? `<div class="vendor">→ ${esc(i.vendor)}</div>` : ""}
           </div>
           <div class="nums">
-            <div class="num"><div class="k">個数</div><div class="v">${i.qty.toLocaleString()} 個</div></div>
-            <div class="num"><div class="k">単価</div><div class="v">${yen(i.price)}</div></div>
+            <div class="num"><div class="k">個数 <span class="ko">수량</span></div><div class="v">${i.qty.toLocaleString()} 個</div></div>
+            <div class="num"><div class="k">単価 <span class="ko">단가</span></div><div class="v">${yen(i.price)}</div></div>
           </div>
-          <div class="total">${yen(total)}<small> / 合計</small></div>
+          <div class="total">${yen(total)}<small> / 合計 합계</small></div>
           <div class="badges">
-            <span class="badge ${payCls}"><span class="d" style="background:currentColor"></span>${esc(i.pay)}</span>
-            <span class="badge ${shipCls}"><span class="d" style="background:currentColor"></span>${esc(i.ship)}</span>
+            <span class="badge ${payCls}"><span class="d" style="background:currentColor"></span><span class="txt">${esc(i.pay)}<span class="ko">${ko(i.pay)}</span></span></span>
+            <span class="badge ${shipCls}"><span class="d" style="background:currentColor"></span><span class="txt">${esc(i.ship)}<span class="ko">${ko(i.ship)}</span></span></span>
           </div>
           ${i.note ? `<div class="note">${esc(i.note)}</div>` : ""}
           <div class="foot">
             <span class="date">${esc(i.createdAt||"")}</span>
             <span class="acts">
-              <button class="ghost" onclick="openForm('${i.id}')">✏️ 編集</button>
-              <button class="ghost danger" onclick="delItem('${i.id}')">削除</button>
+              <button class="ghost sm" onclick="openForm('${i.id}')">✏️ 編集<span class="ko">편집</span></button>
+              <button class="ghost danger sm" onclick="delItem('${i.id}')">削除<span class="ko">삭제</span></button>
             </span>
           </div>
         </div>
       </div>`;
     }).join("");
   }
-
-  function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
   /* ---------- Form ---------- */
   let photoData = "";
@@ -463,13 +462,13 @@
     photoData = "";
     if (id) {
       const i = items.find(x=>x.id===id);
-      document.getElementById("modalTitle").textContent = "商品を編集";
+      document.getElementById("modalTitle").innerHTML = '商品を編集<span class="ko">상품 편집</span>';
       f_id.value = i.id; f_name.value = i.name; f_cat.value = i.cat;
       f_vendor.value = i.vendor||""; f_qty.value = i.qty; f_price.value = i.price;
       f_pay.value = i.pay; f_ship.value = i.ship; f_note.value = i.note||"";
       photoData = i.photo || "";
     } else {
-      document.getElementById("modalTitle").textContent = "商品を追加";
+      document.getElementById("modalTitle").innerHTML = '商品を追加<span class="ko">상품 추가</span>';
       f_id.value = ""; f_name.value = ""; f_cat.value = "ポケモンカード";
       f_vendor.value = ""; f_qty.value = ""; f_price.value = "";
       f_pay.value = "入金待ち"; f_ship.value = "未出荷"; f_note.value = "";
@@ -485,8 +484,7 @@
   }
 
   function onPhoto(e){
-    const file = e.target.files[0];
-    if (!file) return;
+    const file = e.target.files[0]; if (!file) return;
     const reader = new FileReader();
     reader.onload = ev => { resizeImage(ev.target.result, 900, d=>{ photoData = d; renderPhotoPrev(); }); };
     reader.readAsDataURL(file);
@@ -507,58 +505,39 @@
     const prev = document.getElementById("photoPrev");
     const clr = document.getElementById("photoClear");
     if (photoData){ prev.innerHTML = `<img src="${photoData}" />`; clr.style.display="inline-block"; }
-    else { prev.textContent = "なし"; clr.style.display="none"; }
+    else { prev.innerHTML = 'なし<br><span class="ko">없음</span>'; clr.style.display="none"; }
   }
   function clearPhoto(){ photoData=""; document.getElementById("f_photo").value=""; renderPhotoPrev(); }
 
   function saveItem(){
     const name = f_name.value.trim();
-    if (!name){ alert("商品名を入力してください"); f_name.focus(); return; }
+    if (!name){ alert("商品名を入力してください / 상품명을 입력해 주세요"); f_name.focus(); return; }
     const data = {
-      name,
-      cat: f_cat.value,
-      vendor: f_vendor.value.trim(),
-      qty: Number(f_qty.value)||0,
-      price: Number(f_price.value)||0,
-      pay: f_pay.value,
-      ship: f_ship.value,
-      note: f_note.value.trim(),
-      photo: photoData,
+      name, cat: f_cat.value, vendor: f_vendor.value.trim(),
+      qty: Number(f_qty.value)||0, price: Number(f_price.value)||0,
+      pay: f_pay.value, ship: f_ship.value, note: f_note.value.trim(), photo: photoData,
     };
     const id = f_id.value;
-    if (id){
-      const idx = items.findIndex(x=>x.id===id);
-      items[idx] = { ...items[idx], ...data };
-    } else {
-      items.unshift({ id: uid(), createdAt: today(), ...data });
-    }
-    save();
-    closeForm();
+    if (id){ const idx = items.findIndex(x=>x.id===id); items[idx] = { ...items[idx], ...data }; }
+    else { items.unshift({ id: uid(), createdAt: today(), ...data }); }
+    save(); closeForm();
   }
 
   function delItem(id){
     const i = items.find(x=>x.id===id);
-    if (confirm(`「${i.name}」を削除しますか？`)){
-      items = items.filter(x=>x.id!==id);
-      save();
+    if (confirm(`「${i.name}」を削除しますか？ / 삭제하시겠습니까?`)){
+      items = items.filter(x=>x.id!==id); save();
     }
   }
 
   /* ---------- Backup / Share ---------- */
   function download(filename, content, type){
-    const blob = new Blob([content], {type});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = filename; a.click();
+    const blob = new Blob([content], {type}); const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = filename; a.click();
     URL.revokeObjectURL(url);
   }
-  function stamp(){
-    const d = new Date(); const p=n=>String(n).padStart(2,"0");
-    return `${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}`;
-  }
-  function exportJSON(){
-    download(`card-backup-${stamp()}.json`, JSON.stringify(items,null,2), "application/json");
-  }
+  function stamp(){ const d = new Date(); const p=n=>String(n).padStart(2,"0"); return `${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}`; }
+  function exportJSON(){ download(`card-backup-${stamp()}.json`, JSON.stringify(items,null,2), "application/json"); }
   function importJSON(e){
     const file = e.target.files[0]; if(!file) return;
     const reader = new FileReader();
@@ -566,22 +545,19 @@
       try {
         const data = JSON.parse(ev.target.result);
         if (!Array.isArray(data)) throw 0;
-        if (confirm(`${data.length} 件のデータを読み込みます。現在のデータは置き換わります。よろしいですか？`)){
+        if (confirm(`${data.length} 件のデータを読み込みます。現在のデータは置き換わります。\n${data.length}건의 데이터를 불러옵니다. 현재 데이터는 대체됩니다.`)){
           items = data; save();
         }
-      } catch(err){ alert("ファイルを読み込めませんでした。"); }
+      } catch(err){ alert("ファイルを読み込めませんでした。/ 파일을 불러올 수 없습니다."); }
       e.target.value = "";
     };
     reader.readAsText(file);
   }
   function exportShare(){
-    // 現在のデータを埋め込んだ単体HTMLを生成（送るだけで相手も同じ画面を見れる）
     const clone = document.documentElement.cloneNode(true);
-    const dataScript = clone.querySelector("#embedded-data");
-    dataScript.textContent = JSON.stringify(items, null, 2);
-    // 共有ファイル側ではlocalStorageの古いデータより埋め込みを優先させる印
+    clone.querySelector("#embedded-data").textContent = JSON.stringify(items, null, 2);
     const html = "<!DOCTYPE html>\n" + clone.outerHTML;
-    download(`カード販売管理-${stamp()}.html`, html, "text/html");
+    download(`card-sales-export-${stamp()}.html`, html, "text/html");
   }
 
   render();
