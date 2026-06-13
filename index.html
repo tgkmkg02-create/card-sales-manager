@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
 <title>カード販売管理 / 카드 판매 관리</title>
 <style>
   :root {
@@ -395,6 +398,9 @@
 
 <script>
   const STORE_KEY = "card-sales-manager-v1";
+  const VER_KEY = "card-sales-manager-ver";
+  // 公開のたびに更新。保存済みより新しければ埋め込みデータを採用する
+  const DATA_VERSION = 20260613213000;
   const yen = n => "¥" + (Number(n) || 0).toLocaleString("ja-JP");
 
   // 日本語 → 韓国語 表示マップ
@@ -404,15 +410,29 @@
   };
   const ko = jp => KO[jp] || "";
 
+  function embeddedData() {
+    try { return JSON.parse(document.getElementById("embedded-data").textContent); }
+    catch(e) { return []; }
+  }
   function loadData() {
     const saved = localStorage.getItem(STORE_KEY);
-    if (saved) { try { return JSON.parse(saved); } catch(e){} }
-    const embed = document.getElementById("embedded-data").textContent;
-    try { return JSON.parse(embed); } catch(e) { return []; }
+    const savedVer = Number(localStorage.getItem(VER_KEY) || 0);
+    // 公開データの方が新しい（または初回）→ 埋め込みを採用してローカルを更新
+    if (!saved || DATA_VERSION > savedVer) {
+      const embedded = embeddedData();
+      localStorage.setItem(STORE_KEY, JSON.stringify(embedded));
+      localStorage.setItem(VER_KEY, String(DATA_VERSION));
+      return embedded;
+    }
+    try { return JSON.parse(saved); } catch(e) { return embeddedData(); }
   }
   let items = loadData();
 
-  function save() { localStorage.setItem(STORE_KEY, JSON.stringify(items)); render(); }
+  function save() {
+    localStorage.setItem(STORE_KEY, JSON.stringify(items));
+    localStorage.setItem(VER_KEY, String(DATA_VERSION));
+    render();
+  }
   function uid() { return "i" + Date.now() + Math.floor(Math.random()*1000); }
   function today() {
     const d = new Date(); const p = n => String(n).padStart(2,"0");
