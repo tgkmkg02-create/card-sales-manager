@@ -93,6 +93,27 @@
   .stat .sub { font-size: 12px; color: var(--text-faint); margin-top: 2px; }
   .stat .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
+  /* Payment box */
+  .paybox { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 22px; overflow: hidden; }
+  .paybox summary { list-style: none; cursor: pointer; padding: 15px 18px; display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 15.5px; }
+  .paybox summary::-webkit-details-marker { display: none; }
+  .paybox summary .ko { font-size: 12px; font-weight: 600; }
+  .paybox summary .chev { margin-left: auto; color: var(--text-faint); transition: .2s ease; font-size: 12px; }
+  .paybox[open] summary .chev { transform: rotate(180deg); }
+  .paybox .pb-body { padding: 2px 18px 18px; }
+  .paybox .pb-grid { display: grid; grid-template-columns: 190px 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .paybox .pb-grid > div { background: #fff; padding: 11px 14px; }
+  .paybox .pb-k { color: var(--text-sub); font-weight: 700; font-size: 12.5px; }
+  .paybox .pb-k .ko { display: block; font-weight: 600; font-size: 11px; color: var(--text-faint); }
+  .paybox .pb-v { font-weight: 700; font-size: 14.5px; word-break: break-word; }
+  .paybox .pb-v.big { font-size: 18px; letter-spacing: .03em; }
+  .paybox .copy { margin-left: 8px; font-size: 11px; padding: 3px 9px; border-radius: 7px; vertical-align: middle; font-weight: 700; }
+  @media (max-width: 600px){
+    .paybox .pb-grid { grid-template-columns: 1fr; }
+    .paybox .pb-k { padding-bottom: 2px; }
+    .paybox .pb-grid > .pb-k + .pb-v { padding-top: 2px; }
+  }
+
   /* Toolbar */
   .toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
   .search { flex: 1; min-width: 220px; position: relative; }
@@ -206,6 +227,8 @@
   </header>
 
   <section class="summary" id="summary"></section>
+
+  <div id="payboxWrap"></div>
 
   <div class="toolbar">
     <div class="search">
@@ -400,8 +423,20 @@
   const STORE_KEY = "card-sales-manager-v1";
   const VER_KEY = "card-sales-manager-ver";
   // 公開のたびに更新。保存済みより新しければ埋め込みデータを採用する
-  const DATA_VERSION = 20260613213000;
+  const DATA_VERSION = 20260613214500;
   const yen = n => "¥" + (Number(n) || 0).toLocaleString("ja-JP");
+
+  // 入金先（公開URLに表示）。変更したいときはここを編集
+  const PAYMENT = {
+    holder:  "NAGAOKA KIMI",
+    bank:    "RAKUTEN BANK, LTD. (0036)",
+    branch:  "NOERU BRANCH (246)",
+    account: "2714443",
+    country: "Japan",
+    address: "Room 203, STANDZ Shitennojimae-Yuhigaoka, 5-23 Ikutamamaemachi, Tennoji-ku, Osaka 543-0072, Japan",
+    phone:   "+81 80-6141-0715",
+    email:   "tgkmkg02@gmail.com"
+  };
 
   // 日本語 → 韓国語 表示マップ
   const KO = {
@@ -440,6 +475,29 @@
   }
   function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
+  /* ---------- Payment ---------- */
+  function copyText(t){ if(navigator.clipboard){ navigator.clipboard.writeText(t); } }
+  function renderPayment(){
+    const P = PAYMENT;
+    const row = (k, kko, v, cls="") => `<div class="pb-k">${k}<span class="ko">${kko}</span></div><div class="pb-v ${cls}">${v}</div>`;
+    document.getElementById("payboxWrap").innerHTML = `
+      <details class="paybox" open>
+        <summary>💳 Payment Details (Remit to) <span class="ko">입금 정보 (송금처)</span><span class="chev">▼</span></summary>
+        <div class="pb-body">
+          <div class="pb-grid">
+            ${row("Account Holder","예금주", esc(P.holder))}
+            ${row("Bank","은행", esc(P.bank))}
+            ${row("Branch","지점", esc(P.branch))}
+            ${row("Account No.","계좌번호", esc(P.account) + ` <button class="copy" onclick="copyText('${esc(P.account)}')">Copy</button>`, "big")}
+            ${row("Bank Country","은행 국가", esc(P.country))}
+            ${row("Address","주소", esc(P.address))}
+            ${row("Phone","전화", esc(P.phone))}
+            ${row("Email","이메일", esc(P.email))}
+          </div>
+        </div>
+      </details>`;
+  }
+
   /* ---------- Summary ---------- */
   function renderSummary() {
     const total = items.reduce((s,i)=> s + i.qty*i.price, 0);
@@ -463,6 +521,7 @@
   /* ---------- Grid ---------- */
   function render() {
     renderSummary();
+    renderPayment();
     const q = document.getElementById("searchInput").value.trim().toLowerCase();
     const fc = document.getElementById("filterCat").value;
     const fp = document.getElementById("filterPay").value;
