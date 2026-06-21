@@ -226,6 +226,16 @@
     </div>
   </header>
 
+<style>
+  .buyer-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 16px;}
+  .btab{appearance:none;border:1px solid #e3e3ea;background:#fff;border-radius:999px;padding:9px 16px;font-size:14px;font-weight:700;cursor:pointer;color:#333;display:inline-flex;align-items:center;gap:7px;}
+  .btab .ko{font-size:11px;color:#999;font-weight:500;}
+  .btab.active{background:#2563eb;border-color:#2563eb;color:#fff;}
+  .btab.active .ko{color:rgba(255,255,255,.85);}
+  .btab-c{background:rgba(0,0,0,.08);border-radius:999px;padding:1px 8px;font-size:12px;font-weight:700;}
+  .btab.active .btab-c{background:rgba(255,255,255,.25);}
+</style>
+  <nav class="buyer-tabs" id="buyerTabs"></nav>
   <section class="summary" id="summary"></section>
 
   <div id="payboxWrap"></div>
@@ -270,6 +280,14 @@
       <div class="field">
         <label>商品名 <span class="ko">상품명</span> <span style="color:var(--red)">*</span></label>
         <input id="f_name" placeholder="例 / 예: アビスアイ" />
+      </div>
+      <div class="field">
+        <label>誰のページ <span class="ko">누구 페이지</span></label>
+        <select id="f_buyer">
+          <option value="">未指定 / 미지정</option>
+          <option value="ジフン">ジフン / 지훈</option>
+          <option value="おねえさん">おねえさん / 누나</option>
+        </select>
       </div>
       <div class="row2">
         <div class="field">
@@ -462,6 +480,18 @@
     try { return JSON.parse(saved); } catch(e) { return embeddedData(); }
   }
   let items = loadData();
+  let currentBuyer = "";
+  function setBuyer(b){ currentBuyer = b || ""; render(); }
+  function renderTabs(){
+    const tabs=[["","全体","전체"],["ジフン","ジフン","지훈"],["おねえさん","おねえさん","누나"]];
+    const wrap=document.getElementById("buyerTabs"); if(!wrap) return;
+    wrap.innerHTML = tabs.map(function(t){
+      const v=t[0];
+      const cnt = v ? items.filter(function(i){return (i.buyer||"")===v;}).length : items.length;
+      const active = currentBuyer===v ? " active" : "";
+      return '<button class="btab'+active+'" data-b="'+v+'" onclick="setBuyer(this.dataset.b)">'+t[1]+' <span class="ko">'+t[2]+'</span> <span class="btab-c">'+cnt+'</span></button>';
+    }).join("");
+  }
 
   function save() {
     localStorage.setItem(STORE_KEY, JSON.stringify(items));
@@ -500,14 +530,15 @@
 
   /* ---------- Summary ---------- */
   function renderSummary() {
-    const total = items.reduce((s,i)=> s + i.qty*i.price, 0);
-    const paid = items.filter(i=>i.pay==="入金済み").reduce((s,i)=> s + i.qty*i.price, 0);
-    const unpaid = items.filter(i=>i.pay==="入金待ち").reduce((s,i)=> s + i.qty*i.price, 0);
-    const unshipped = items.filter(i=>i.ship==="未出荷").length;
+    const base = currentBuyer ? items.filter(i=>(i.buyer||"")===currentBuyer) : items;
+    const total = base.reduce((s,i)=> s + i.qty*i.price, 0);
+    const paid = base.filter(i=>i.pay==="入金済み").reduce((s,i)=> s + i.qty*i.price, 0);
+    const unpaid = base.filter(i=>i.pay==="入金待ち").reduce((s,i)=> s + i.qty*i.price, 0);
+    const unshipped = base.filter(i=>i.ship==="未出荷").length;
     const cards = [
-      { jp:"総売上", ko:"총매출", color:"#2563eb", value: yen(total), sub:`${items.length} 商品 / 상품` },
-      { jp:"入金済み", ko:"입금완료", color:"#16a34a", value: yen(paid), sub:`${items.filter(i=>i.pay==="入金済み").length} 件 / 건` },
-      { jp:"入金待ち", ko:"입금대기", color:"#d97706", value: yen(unpaid), sub:`${items.filter(i=>i.pay==="入金待ち").length} 件 / 건` },
+      { jp:"総売上", ko:"총매출", color:"#2563eb", value: yen(total), sub:`${base.length} 商品 / 상품` },
+      { jp:"入金済み", ko:"입금완료", color:"#16a34a", value: yen(paid), sub:`${base.filter(i=>i.pay==="入金済み").length} 件 / 건` },
+      { jp:"入金待ち", ko:"입금대기", color:"#d97706", value: yen(unpaid), sub:`${base.filter(i=>i.pay==="入金待ち").length} 件 / 건` },
       { jp:"未出荷", ko:"미출고", color:"#6b7280", value: `${unshipped}<small> 件 / 건</small>`, sub:"要対応 / 대응 필요" },
     ];
     document.getElementById("summary").innerHTML = cards.map(c=>`
@@ -522,12 +553,14 @@
   function render() {
     renderSummary();
     renderPayment();
+    renderTabs();
     const q = document.getElementById("searchInput").value.trim().toLowerCase();
     const fc = document.getElementById("filterCat").value;
     const fp = document.getElementById("filterPay").value;
     const fs = document.getElementById("filterShip").value;
 
     let list = items.filter(i => {
+      if (currentBuyer && (i.buyer||"") !== currentBuyer) return false;
       if (fc && i.cat !== fc) return false;
       if (fp && i.pay !== fp) return false;
       if (fs && i.ship !== fs) return false;
@@ -595,13 +628,13 @@
       const i = items.find(x=>x.id===id);
       document.getElementById("modalTitle").innerHTML = '商品を編集<span class="ko">상품 편집</span>';
       f_id.value = i.id; f_name.value = i.name; f_cat.value = i.cat;
-      f_vendor.value = i.vendor||""; f_qty.value = i.qty; f_price.value = i.price;
+      f_vendor.value = i.vendor||""; f_buyer.value = i.buyer||""; f_qty.value = i.qty; f_price.value = i.price;
       f_pay.value = i.pay; f_ship.value = i.ship; f_note.value = i.note||"";
       photoData = i.photo || "";
     } else {
       document.getElementById("modalTitle").innerHTML = '商品を追加<span class="ko">상품 추가</span>';
       f_id.value = ""; f_name.value = ""; f_cat.value = "ポケモンカード";
-      f_vendor.value = ""; f_qty.value = ""; f_price.value = "";
+      f_vendor.value = ""; f_buyer.value = currentBuyer||""; f_qty.value = ""; f_price.value = "";
       f_pay.value = "入金待ち"; f_ship.value = "未出荷"; f_note.value = "";
     }
     renderPhotoPrev();
@@ -644,7 +677,7 @@
     const name = f_name.value.trim();
     if (!name){ alert("商品名を入力してください / 상품명을 입력해 주세요"); f_name.focus(); return; }
     const data = {
-      name, cat: f_cat.value, vendor: f_vendor.value.trim(),
+      name, cat: f_cat.value, vendor: f_vendor.value.trim(), buyer: f_buyer.value,
       qty: Number(f_qty.value)||0, price: Number(f_price.value)||0,
       pay: f_pay.value, ship: f_ship.value, note: f_note.value.trim(), photo: photoData,
     };
