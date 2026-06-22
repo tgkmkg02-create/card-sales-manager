@@ -226,7 +226,18 @@
     </div>
   </header>
 
+  <nav class="page-nav" id="pageNav"></nav>
+  <div id="salesView">
+
 <style>
+  .page-nav{display:flex;gap:8px;margin:6px 0 14px;flex-wrap:wrap;}
+  .pnav{appearance:none;border:1px solid #d8d8e0;background:#fff;border-radius:10px;padding:9px 16px;font-size:14px;font-weight:800;cursor:pointer;color:#444;display:inline-flex;flex-direction:column;line-height:1.2;}
+  .pnav .ko{font-size:10px;color:#999;font-weight:600;}
+  .pnav.active{background:#111;color:#fff;border-color:#111;}
+  .pnav.active .ko{color:rgba(255,255,255,.8);}
+  .pv-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:4px 0 16px;flex-wrap:wrap;}
+  .pv-title{margin:0;font-size:20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .pv-lock{font-size:11px;font-weight:700;color:#7c3aed;background:#f1e9ff;border-radius:999px;padding:3px 10px;}
   .buyer-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 16px;}
   .btab{appearance:none;border:1px solid #e3e3ea;background:#fff;border-radius:999px;padding:9px 16px;font-size:14px;font-weight:700;cursor:pointer;color:#333;display:inline-flex;align-items:center;gap:7px;}
   .btab .ko{font-size:11px;color:#999;font-weight:500;}
@@ -269,6 +280,24 @@
     データはこのブラウザに自動保存されます。共有・引き継ぎは「共有用に書き出し」または「バックアップ」をお使いください。
     <span class="ko" style="display:block">데이터는 이 브라우저에 자동 저장됩니다. 공유 · 인계는 「공유용 내보내기」 또는 「백업」을 이용하세요.</span>
   </footer>
+  </div><!-- /salesView -->
+
+  <section id="purchaseView" style="display:none">
+    <div class="pv-head">
+      <h2 class="pv-title">🛒 仕入れ記録<span class="ko" style="font-size:13px;color:#888">매입 기록</span> <span class="pv-lock">管理者専用 / 관리자 전용</span></h2>
+      <button class="primary" onclick="openPForm()">＋ 仕入れを追加<span class="ko">매입 추가</span></button>
+    </div>
+    <section class="summary" id="psummary"></section>
+    <div class="toolbar">
+      <div class="search"><span class="ico">🔍</span><input id="psearch" placeholder="商品名・仕入先で検索 / 검색" oninput="renderPurchases()" /></div>
+      <select class="filter" id="pfilterPay" onchange="renderPurchases()">
+        <option value="">支払：すべて / 지불 전체</option>
+        <option value="支払済み">支払済み / 지불완료</option>
+        <option value="未払い">未払い / 미지불</option>
+      </select>
+    </div>
+    <section class="grid" id="pgrid"></section>
+  </section>
 </div>
 
 <!-- Modal -->
@@ -353,6 +382,55 @@
   </div>
 </div>
 
+<!-- Purchase Modal（管理者専用） -->
+<div class="overlay" id="poverlay" onclick="if(event.target===this)closePForm()">
+  <div class="modal">
+    <h2 id="pModalTitle">仕入れを追加<span class="ko">매입 추가</span></h2>
+    <div class="form">
+      <input type="hidden" id="p_id" />
+      <div class="field">
+        <label>商品名 <span class="ko">상품명</span> <span style="color:var(--red)">*</span></label>
+        <input id="p_name" placeholder="例 / 예: リザードン PSA10" />
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>カテゴリー <span class="ko">카테고리</span></label>
+          <select id="p_cat"><option>ポケモンカード</option><option>ワンピースカード</option><option>その他</option></select>
+        </div>
+        <div class="field">
+          <label>仕入先 <span class="ko">매입처</span></label>
+          <input id="p_supplier" placeholder="例 / 예: ○○" />
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>個数 <span class="ko">수량</span></label><input id="p_qty" type="number" min="0" oninput="updatePCalc()" /></div>
+        <div class="field"><label>仕入単価（円） <span class="ko">매입 단가</span></label><input id="p_cost" type="number" min="0" oninput="updatePCalc()" /></div>
+      </div>
+      <div class="calc">仕入合計 / 매입 합계：<b id="pCalcTotal">¥0</b></div>
+      <div class="row2">
+        <div class="field"><label>支払 <span class="ko">지불</span></label><select id="p_pay"><option>未払い</option><option>支払済み</option></select></div>
+        <div class="field"><label>仕入日 <span class="ko">매입일</span></label><input id="p_date" type="date" /></div>
+      </div>
+      <div class="field">
+        <label>写真 <span class="ko">사진</span></label>
+        <div class="photo-input">
+          <div class="photo-prev" id="pPhotoPrev">なし<br><span class="ko">없음</span></div>
+          <div>
+            <button type="button" class="sm" onclick="document.getElementById('p_photo').click()">画像を選ぶ<span class="ko">이미지 선택</span></button>
+            <button type="button" class="ghost sm" id="pPhotoClear" onclick="clearPPhoto()" style="display:none">削除<span class="ko">삭제</span></button>
+          </div>
+          <input type="file" id="p_photo" accept="image/*" style="display:none" onchange="onPPhoto(event)" />
+        </div>
+      </div>
+      <div class="field"><label>メモ <span class="ko">메모</span></label><textarea id="p_note" placeholder="状態・条件など / 상태 · 조건 등"></textarea></div>
+      <div class="actions">
+        <button class="ghost" onclick="closePForm()">キャンセル<span class="ko">취소</span></button>
+        <button class="primary" onclick="savePurchase()">保存<span class="ko">저장</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ===== データ（共有書き出しでここに埋め込まれます / 공유 내보내기 시 여기에 저장됩니다） ===== -->
 <script id="embedded-data" type="application/json">[]</script>
 
@@ -384,6 +462,8 @@
   let items = [];
   let currentBuyer = "";
   let isEditor = false;
+  let purchases = [];
+  let currentView = "sales";
 
   function uid(){ return "i" + Date.now() + Math.floor(Math.random()*1000); }
   function today(){ const d=new Date(); const p=n=>String(n).padStart(2,"0"); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`; }
@@ -402,8 +482,12 @@
   async function refreshAuth(){
     const { data } = await sb.auth.getSession();
     isEditor = !!(data && data.session);
+    if (!isEditor) currentView = "sales";
     renderAuthUI();
+    renderPageNav();
+    applyView();
     render();
+    if (isEditor) loadPurchases();
   }
   function renderAuthUI(){
     const btn = document.getElementById("authBtn");
@@ -679,11 +763,98 @@
     reader.readAsText(file);
   }
 
+  /* ---------- 仕入れ記録（管理者専用） ---------- */
+  let pPhotoData = "";
+  function renderPageNav(){
+    const nav=document.getElementById("pageNav"); if(!nav) return;
+    if(!isEditor){ nav.innerHTML=""; return; }
+    const tab=(v,jp,k)=>`<button class="pnav${currentView===v?' active':''}" onclick="switchView('${v}')">${jp}<span class="ko">${k}</span></button>`;
+    nav.innerHTML = tab("sales","📦 販売管理","판매 관리") + tab("purchase","🛒 仕入れ記録","매입 기록");
+  }
+  function applyView(){
+    const s=document.getElementById("salesView"), p=document.getElementById("purchaseView");
+    if(s) s.style.display = currentView==="sales" ? "" : "none";
+    if(p) p.style.display = currentView==="purchase" ? "" : "none";
+    renderPageNav();
+  }
+  function switchView(v){
+    if(v==="purchase" && !isEditor){ openLogin(); return; }
+    currentView=v; applyView();
+    if(v==="purchase") renderPurchases();
+  }
+  async function loadPurchases(){
+    if(!isEditor){ purchases=[]; return; }
+    const { data, error } = await sb.from("purchases").select("*").order("sort",{ascending:false});
+    if(error){ console.error(error); return; }
+    purchases = (data||[]).map(r=>({...r, createdAt:r.created_at}));
+    if(currentView==="purchase") renderPurchases();
+  }
+  function renderPurchases(){
+    const q=(document.getElementById("psearch").value||"").trim().toLowerCase();
+    const fp=document.getElementById("pfilterPay").value;
+    const total=purchases.reduce((s,i)=>s+i.qty*i.cost,0);
+    const paid=purchases.filter(i=>i.pay==="支払済み").reduce((s,i)=>s+i.qty*i.cost,0);
+    const unpaid=purchases.filter(i=>i.pay==="未払い").reduce((s,i)=>s+i.qty*i.cost,0);
+    const sc=[
+      {jp:"総仕入額",ko:"총매입액",color:"#7c3aed",value:yen(total),sub:`${purchases.length} 件 / 건`},
+      {jp:"支払済み",ko:"지불완료",color:"#16a34a",value:yen(paid),sub:`${purchases.filter(i=>i.pay==="支払済み").length} 件 / 건`},
+      {jp:"未払い",ko:"미지불",color:"#d97706",value:yen(unpaid),sub:`${purchases.filter(i=>i.pay==="未払い").length} 件 / 건`},
+    ];
+    document.getElementById("psummary").innerHTML=sc.map(c=>`<div class="stat"><div class="label"><span class="dot" style="background:${c.color}"></span>${c.jp} <span class="ko">${c.ko}</span></div><div class="value">${c.value}</div><div class="sub">${c.sub}</div></div>`).join("");
+    let list=purchases.filter(i=>{ if(fp && i.pay!==fp) return false; if(q && !((i.name+" "+(i.supplier||"")).toLowerCase().includes(q))) return false; return true; });
+    const grid=document.getElementById("pgrid");
+    if(list.length===0){ grid.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="big">🛒</div><div>仕入れ記録がありません。<span class='ko'>매입 기록이 없습니다.</span></div></div>`; return; }
+    grid.innerHTML=list.map(i=>{
+      const t=i.qty*i.cost; const payCls=i.pay==="支払済み"?"paid":"unpaid";
+      const photo=i.photo?`<img src="${i.photo}" alt="${esc(i.name)}" />`:`<div class="noimg">🃏<br>画像なし<br><span class="ko">이미지 없음</span></div>`;
+      return `<div class="card"><div class="photo">${photo}<span class="cat">${esc(i.cat||"")}<span class="ko">${ko(i.cat)}</span></span></div>
+      <div class="body"><div><div class="title">${esc(i.name)}</div>${i.supplier?`<div class="vendor">仕入先 / 매입처: ${esc(i.supplier)}</div>`:""}</div>
+      <div class="nums"><div class="num"><div class="k">個数 <span class="ko">수량</span></div><div class="v">${Number(i.qty).toLocaleString()} 個</div></div><div class="num"><div class="k">仕入単価 <span class="ko">매입 단가</span></div><div class="v">${yen(i.cost)}</div></div></div>
+      <div class="total">${yen(t)}<small> / 仕入合計 매입합계</small></div>
+      <div class="badges"><span class="badge ${payCls}"><span class="d" style="background:currentColor"></span><span class="txt">${esc(i.pay||"")}</span></span></div>
+      ${i.note?`<div class="note">${esc(i.note)}</div>`:""}
+      <div class="foot"><span class="date">${esc(i.pdate||i.createdAt||"")}</span><span class="acts"><button class="ghost sm" onclick="openPForm('${i.id}')">✏️ 編集<span class="ko">편집</span></button><button class="ghost danger sm" onclick="delPurchase('${i.id}')">削除<span class="ko">삭제</span></button></span></div></div></div>`;
+    }).join("");
+  }
+  function updatePCalc(){ const t=(Number(document.getElementById("p_qty").value)||0)*(Number(document.getElementById("p_cost").value)||0); document.getElementById("pCalcTotal").textContent=yen(t); }
+  function openPForm(id){
+    if(!isEditor){ openLogin(); return; }
+    document.getElementById("poverlay").classList.add("open"); pPhotoData="";
+    const g=x=>document.getElementById(x);
+    if(id){ const i=purchases.find(x=>x.id===id); g("pModalTitle").innerHTML='仕入れを編集<span class="ko">매입 편집</span>';
+      g("p_id").value=i.id; g("p_name").value=i.name; g("p_cat").value=i.cat||"ポケモンカード"; g("p_supplier").value=i.supplier||"";
+      g("p_qty").value=i.qty; g("p_cost").value=i.cost; g("p_pay").value=i.pay||"未払い"; g("p_date").value=i.pdate||""; g("p_note").value=i.note||""; pPhotoData=i.photo||"";
+    } else { g("pModalTitle").innerHTML='仕入れを追加<span class="ko">매입 추가</span>';
+      g("p_id").value=""; g("p_name").value=""; g("p_cat").value="ポケモンカード"; g("p_supplier").value="";
+      g("p_qty").value=""; g("p_cost").value=""; g("p_pay").value="未払い"; g("p_date").value=""; g("p_note").value=""; }
+    renderPPhotoPrev(); updatePCalc();
+  }
+  function closePForm(){ document.getElementById("poverlay").classList.remove("open"); }
+  function onPPhoto(e){ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=ev=>resizeImage(ev.target.result,900,d=>{pPhotoData=d;renderPPhotoPrev();}); r.readAsDataURL(f); }
+  function renderPPhotoPrev(){ const pv=document.getElementById("pPhotoPrev"), cl=document.getElementById("pPhotoClear"); if(pPhotoData){pv.innerHTML=`<img src="${pPhotoData}" />`;cl.style.display="inline-block";} else {pv.innerHTML='なし<br><span class="ko">없음</span>';cl.style.display="none";} }
+  function clearPPhoto(){ pPhotoData=""; document.getElementById("p_photo").value=""; renderPPhotoPrev(); }
+  async function savePurchase(){
+    if(!isEditor){ openLogin(); return; }
+    const g=x=>document.getElementById(x); const name=g("p_name").value.trim();
+    if(!name){ alert("商品名を入力してください / 상품명을 입력해 주세요"); g("p_name").focus(); return; }
+    const row={ name, cat:g("p_cat").value, supplier:g("p_supplier").value.trim(), qty:Number(g("p_qty").value)||0, cost:Number(g("p_cost").value)||0, pay:g("p_pay").value, pdate:g("p_date").value||null, note:g("p_note").value.trim(), photo:pPhotoData };
+    const id=g("p_id").value; let res;
+    if(id){ res=await sb.from("purchases").update(row).eq("id",id); }
+    else { row.id=uid(); row.created_at=today(); row.sort=Date.now(); res=await sb.from("purchases").insert(row); }
+    if(res.error){ alert("保存に失敗 / 저장 실패: "+res.error.message); return; }
+    closePForm(); await loadPurchases();
+  }
+  async function delPurchase(id){
+    if(!isEditor){ openLogin(); return; }
+    const i=purchases.find(x=>x.id===id);
+    if(confirm(`「${i.name}」を削除しますか？ / 삭제하시겠습니까?`)){ const {error}=await sb.from("purchases").delete().eq("id",id); if(error){alert("削除失敗: "+error.message);return;} await loadPurchases(); }
+  }
+
   /* ---------- init ---------- */
   injectAuthUI();
   sb.auth.onAuthStateChange(()=>{ refreshAuth(); });
-  window.addEventListener("focus", ()=>{ loadData(); });
-  (async ()=>{ await refreshAuth(); await loadData(); })();
+  window.addEventListener("focus", ()=>{ loadData(); if(isEditor) loadPurchases(); });
+  (async ()=>{ await refreshAuth(); await loadData(); applyView(); })();
 
 </script>
 </body>
